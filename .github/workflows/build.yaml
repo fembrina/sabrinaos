@@ -1,0 +1,43 @@
+name: SabrinaOS Build CI
+
+# Trigger this script on two events:
+# 1. When code is pushed to main (to update history)
+# 2. When a Pull Request targets main (the Gatekeeper)
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    # Step 1: Download your code
+    - name: Checkout Code
+      uses: actions/checkout@v4
+
+    # Step 2: Install the toolchain
+    # We need NASM for assembly and gcc-multilib for 32-bit compilation
+    - name: Install Dependencies
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y nasm gcc-multilib build-essential qemu-system-x86
+
+    # Step 3: Run your Makefile
+    # This runs the 'all' target. If it returns exit code 0, Green Check.
+    # If GCC throws an error/warning, it returns exit code 1, Red X.
+    - name: Compile Kernel
+      run: make
+
+    # Step 4: Verify the output exists
+    # Just a sanity check to ensure the file was actually created
+    - name: Verify Binary
+      run: |
+        if [ -f sabrinaOS.bin ]; then
+          echo "Kernel built successfully!"
+        else
+          echo "Error: Binary not found!"
+          exit 1
+        fi
