@@ -1,23 +1,49 @@
+# --- Toolchain ---
 AS = nasm
 CC = gcc
 LD = ld
 
+# --- Directories ---
+SRC_DIR = src
+BUILD_DIR = build
+
+# --- Flags ---
 ASFLAGS = -felf32
-CFLAGS = -m32 -ffreestanding -c -fno-stack-protector -fno-pie -fno-pic -mno-sse -mno-sse2 -mno-80387 -mno-mmx -Wall -Wextra -Werror -Wfloat-equal -Wstrict-prototypes -std=gnu99
+CFLAGS = -m32 -ffreestanding -c \
+         -fno-stack-protector -fno-pie -fno-pic \
+         -mno-sse -mno-sse2 -mno-80387 -mno-mmx \
+         -Wall -Wextra -Werror -Wfloat-equal -Wstrict-prototypes \
+         -std=gnu99 -g
 LDFLAGS = -m elf_i386 -T linker.ld
 
-all: sabrinaOS.bin
+# --- Targets ---
 
-sabrinaOS.bin: boot.o kernel.o
-	$(LD) $(LDFLAGS) -o sabrinaOS.bin boot.o kernel.o
+# Default target
+all: $(BUILD_DIR)/sabrinaOS.bin
 
-# TELL MAKE TO LOOK IN src/boot/
-boot.o: src/boot/boot.s
-	$(AS) $(ASFLAGS) src/boot/boot.s -o boot.o
+# Linker Rule
+# $^ = All dependencies (boot.o and kernel.o)
+# $@ = The target file (sabrinaOS.bin)
+$(BUILD_DIR)/sabrinaOS.bin: $(BUILD_DIR)/boot.o $(BUILD_DIR)/kernel.o
+	$(LD) $(LDFLAGS) -o $@ $^
 
-# TELL MAKE TO LOOK IN src/kernel/
-kernel.o: src/kernel/kernel.c
-	$(CC) $(CFLAGS) src/kernel/kernel.c -o kernel.o
+# Assembly Rule
+# $< = The first dependency (boot.s)
+# @mkdir -p $(BUILD_DIR) = Create the build folder if it doesn't exist
+$(BUILD_DIR)/boot.o: $(SRC_DIR)/boot/boot.s
+	@mkdir -p $(BUILD_DIR)
+	$(AS) $(ASFLAGS) $< -o $@
 
+# C Compilation Rule
+$(BUILD_DIR)/kernel.o: $(SRC_DIR)/kernel/kernel.c
+	@mkdir -p $(BUILD_DIR)
+	$(CC) $(CFLAGS) $< -o $@
+
+# Clean Rule
+# Just nuke the whole build directory
 clean:
-	rm -f *.o sabrinaOS.bin
+	rm -rf $(BUILD_DIR)
+
+# Run Rule
+run: $(BUILD_DIR)/sabrinaOS.bin
+	qemu-system-i386 -kernel $(BUILD_DIR)/sabrinaOS.bin
