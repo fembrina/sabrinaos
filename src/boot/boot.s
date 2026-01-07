@@ -1,4 +1,4 @@
-; SabrinaOS - A Hobby Kernel
+; boot.s - The Entry Point for SabrinaOS
 ; Copyright (C) 2026 fembrina
 ;
 ; This program is free software; you can redistribute it and/or
