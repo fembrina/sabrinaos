@@ -18,6 +18,8 @@ uint16_t vga_entry(unsigned char uc, uint8_t color) {
 }
 
 void kmain(void) {
+    uint8_t color = 0;
+
     // Clear screen
     for(int i = 0; i < 80 * 25; i++) {
         vga_buffer[i] = vga_entry(' ', VGA_COLOR_WHITE | VGA_COLOR_BLUE << 4);
@@ -27,7 +29,8 @@ void kmain(void) {
     const char* str = "Welcome to SabrinaOS v0.1";
     int j = 0;
     while(str[j] != '\0') {
-        vga_buffer[j] = vga_entry(str[j], VGA_COLOR_WHITE | VGA_COLOR_BLUE << 4);
+        vga_buffer[j] = vga_entry(str[j], VGA_COLOR_WHITE | color << 4);
+        color++;
         j++;
     }
 }
