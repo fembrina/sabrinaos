@@ -35,7 +35,7 @@ jobs:
     # Just a sanity check to ensure the file was actually created
     - name: Verify Binary
       run: |
-        if [ -f sabrinaOS.bin ]; then
+        if [ -f build/sabrinaOS.bin ]; then
           echo "Kernel built successfully!"
         else
           echo "Error: Binary not found!"
