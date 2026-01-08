@@ -24,13 +24,23 @@ all: $(BUILD_DIR)/sabrinaOS.bin
 # Linker Rule
 # $^ = All dependencies (boot.o and kernel.o)
 # $@ = The target file (sabrinaOS.bin)
-$(BUILD_DIR)/sabrinaOS.bin: $(BUILD_DIR)/boot.o $(BUILD_DIR)/kernel.o
+$(BUILD_DIR)/sabrinaOS.bin: $(BUILD_DIR)/boot.o $(BUILD_DIR)/kernel.o $(BUILD_DIR)/gdt.o $(BUILD_DIR)/gdt_flush.o
 	$(LD) $(LDFLAGS) -o $@ $^
 
 # Assembly Rule
 # $< = The first dependency (boot.s)
 # @mkdir -p $(BUILD_DIR) = Create the build folder if it doesn't exist
 $(BUILD_DIR)/boot.o: $(SRC_DIR)/boot/boot.s
+	@mkdir -p $(BUILD_DIR)
+	$(AS) $(ASFLAGS) $< -o $@
+
+# Rule for GDT C file
+$(BUILD_DIR)/gdt.o: $(SRC_DIR)/kernel/gdt.c
+	@mkdir -p $(BUILD_DIR)
+	$(CC) $(CFLAGS) $< -o $@
+
+# Rule for GDT Assembly file
+$(BUILD_DIR)/gdt_flush.o: $(SRC_DIR)/kernel/gdt_flush.s
 	@mkdir -p $(BUILD_DIR)
 	$(AS) $(ASFLAGS) $< -o $@
 

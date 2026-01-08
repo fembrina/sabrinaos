@@ -12,7 +12,10 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  */
+
 #include <stdint.h>
+
+#include "gdt.h"
 
 volatile uint16_t* vga_buffer = (uint16_t*)0xB8000;
 
@@ -27,6 +30,8 @@ uint16_t vga_entry(unsigned char uc, uint8_t color) {
 }
 
 void kmain(void) {
+    init_gdt();
+
     uint8_t color = 0;
 
     // Clear screen
@@ -41,5 +46,13 @@ void kmain(void) {
         vga_buffer[j] = vga_entry(str[j], VGA_COLOR_WHITE | color << 4);
         color++;
         j++;
+    }
+
+    j = 80;
+    const char* status = "SabrinaOS: GDT Loaded.";
+    int k = 0;
+    while(status[k] != '\0') {
+        vga_buffer[j + k] = vga_entry(status[k], VGA_COLOR_WHITE | VGA_COLOR_BLUE << 4);
+        k++;
     }
 }
